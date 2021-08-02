@@ -42,7 +42,7 @@ impl Output {
 	/// buffering attributes, are specified in `light_state`.
 	pub fn set_button(&mut self, button: Button, color: Color, d: DoubleBufferingBehavior)
 			-> Result<(), crate::MidiError> {
-		
+
 		let light_code = make_color_code(color, d);
 
 		match button {
@@ -61,18 +61,18 @@ impl Output {
 
 	/// In order to make maximum use of the original Launchpad's slow midi speeds, a rapid LED
 	/// lighting mode was invented which allows the lighting of two leds in just a single message.
-	/// To use this mode, simply start sending these message and the Launchpad will update the 8x8 
+	/// To use this mode, simply start sending these message and the Launchpad will update the 8x8
 	/// grid in left-to-right, top-to-bottom order, then the eight scene launch buttons in
 	/// top-to-bottom order, and finally the eight Automap/Live buttons in left-to-right order
 	/// (these are otherwise inaccessible using note-on messages). Overflowing data will be ignored.
-	/// 
+	///
 	/// To leave the mode, simply send any other message. Sending another kind of message and then
 	/// re-sending this message will reset the cursor to the top left of the grid.
 	pub fn set_button_rapid(&mut self,
 		color1: Color, dbb1: DoubleBufferingBehavior,
 		color2: Color, dbb2: DoubleBufferingBehavior,
 	) -> Result<(), crate::MidiError> {
-		
+
 		return self.send(&[0x92, make_color_code(color1, dbb1), make_color_code(color2, dbb2)]);
 	}
 
@@ -80,7 +80,7 @@ impl Output {
 	/// According to the Launchpad documentation, sending this command resets various configuration
 	/// settings - see `reset()` for more information. However, in my experience, that only
 	/// sometimes happens. Weird.
-	/// 
+	///
 	/// Btw this function is not really intended for regular use. It's more like a test function to
 	/// check if the device is working correctly, diagnostic stuff like that.
 	pub fn turn_on_all_leds(&mut self, brightness: Brightness) -> Result<(), crate::MidiError> {
@@ -98,14 +98,17 @@ impl Output {
 	/// faster than the eye can see: a technique known as multiplexing. This command provides a way
 	/// of altering the proportion of time for which the LEDs are on while they are in low- and
 	/// medium-brightness modes. This proportion is known as the duty cycle.
+    ///
 	/// Manipulating this is useful for fade effects, for adjusting contrast, and for creating
 	/// custom palettes.
+    ///
 	/// The default duty cycle is 1/5 meaning that low-brightness LEDs are on for only every fifth
 	/// multiplex pass, and medium-brightness LEDs are on for two passes in every five.
 	/// Generally, lower duty cycles (numbers closer to zero) will increase contrast between
 	/// different brightness settings but will also increase flicker; higher ones will eliminate
 	/// flicker, but will also reduce contrast. Note that using less simple ratios (such as 3/17 or
 	/// 2/11) can also increase perceived flicker.
+    ///
 	/// If you are particularly sensitive to strobing lights, please use this command with care when
 	/// working with large areas of low-brightness LEDs: in particular, avoid duty cycles of 1/8 or
 	/// less.
@@ -124,12 +127,12 @@ impl Output {
 
 	/// This method controls the double buffering mode on the Launchpad. See the module
 	/// documentation for an explanation on double buffering.
-	/// 
+	///
 	/// The default state is no flashing; the first buffer is both the update and the displayed
 	/// buffer: In this mode, any LED data written to Launchpad is displayed instantly. Sending this
 	/// message also resets the flash timer, so it can be used to resynchronise the flash rates of
-	/// all the Launchpads connected to a system. 
-	/// 
+	/// all the Launchpads connected to a system.
+	///
 	/// - If `copy` is set, copy the LED states from the new displayed buffer to the new updating
 	/// buffer.
 	/// - If `flash` is set, continually flip displayed buffers to make selected LEDs flash.
@@ -141,7 +144,7 @@ impl Output {
 				| ((d.flash as u8) << 3)
 				| ((d.edited_buffer as u8) << 2)
 				| d.displayed_buffer as u8;
-		
+
 		return self.send(&[0xB0, 0, last_byte]);
 	}
 
@@ -153,7 +156,6 @@ impl Output {
 
 	pub fn scroll_text(&mut self, text: &[u8], color: Color, should_loop: bool)
 			-> Result<(), crate::MidiError> {
-		
 		let color_code = make_color_code_loopable(color, should_loop);
 
 		let bytes = &[
@@ -185,18 +187,18 @@ impl Output {
 		for _ in 0..40 {
 			self.set_button_rapid(color, dbb, color, dbb)?;
 		}
-		
+
 		return Ok(());
 	}
 }
 
 fn make_color_code_loopable(color: Color, should_loop: bool)
 		-> u8 {
-	
+
 	// Bit 6 - Loop - If 1: loop the text
 	// Bit 5..4 - Green LED brightness
 	// Bit 3..2 - uhhhh, I think these should probably be empty?
 	// Bit 1..0 - Red LED brightness
-	
+
 	return ((should_loop as u8) << 6) | (color.green() << 4) | color.red();
 }

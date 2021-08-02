@@ -94,6 +94,8 @@ pub use midi_io::*;
 mod errors;
 pub use errors::*;
 
+pub mod generic;
+
 pub mod launchpad_s;
 pub use launchpad_s as s;
 

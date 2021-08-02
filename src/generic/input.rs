@@ -3,7 +3,7 @@ use std::convert::TryInto;
 use super::Button;
 
 #[derive(Debug, Eq, PartialEq, Hash, Clone)]
-/// A Launchpad Mini input message
+/// A generic Launchpad input message
 pub enum Message {
     /// A button was pressed
     Press { button: Button },
@@ -26,7 +26,7 @@ pub enum Message {
     },
 }
 
-/// The Launchpad Mini input connection creator.
+/// The generic Launchpad input connection creator.
 pub struct Input;
 
 fn decode_short_message(data: &[u8]) -> Message {
@@ -115,7 +115,12 @@ fn decode_grid_button(btn: u8) -> Button {
     return Button::GridButton { x, y };
 }
 
-impl crate::InputDevice for Input {
+pub trait GenericInput {
+	const MIDI_CONNECTION_NAME: &'static str;
+	const MIDI_DEVICE_KEYWORD: &'static str;
+}
+
+impl crate::InputDevice for GenericInput {
     const MIDI_DEVICE_KEYWORD: &'static str = "Launchpad Mini";
     const MIDI_CONNECTION_NAME: &'static str = "Launchy Mini Input";
     type Message = Message;

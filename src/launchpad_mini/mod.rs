@@ -105,6 +105,7 @@ impl crate::DeviceSpec for Spec {
                 x: button.abs_x() as u32,
                 y: button.abs_y() as u32,
             }),
+            _ => None,
         }
     }
 }
