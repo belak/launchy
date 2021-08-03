@@ -13,3 +13,4 @@ categories = ["api-bindings", "games", "graphics", "rendering", "multimedia::ima
 [dependencies]
 midir = "0.7"
 embedded-graphics = { version = "0.7", optional = true }
+thiserror = "1.0"
